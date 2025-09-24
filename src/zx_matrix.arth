@@ -1,0 +1,121 @@
+; ZX Spectrum keyboard matrix:
+
+; 1  2  3  4  5  6  7  8  9  0
+; q  w  e  r  t  y  u  i  o  p
+; a  s  d  f  g  h  j  k  l  enter
+; cs z  x  c  v  b  n  m  ss space
+
+
+; Scan code tables
+
+;       |   D0    D1    D2    D3    D4
+;-------|---------------------------------- 
+;  A8   |   CS    Z     X     C     V
+;  A9   |   A     S     D     F     G     
+;  A10  |   Q     W     E     R     T      
+;  A11  |   1     2     3     4     5
+;  A12  |   0     9     8     7     6
+;  A13  |   P     O     I     U     Y
+;  A14  |   Enter L     K     J     H
+;  A15  |   Space SS    M     N     B
+;------------------------------------------
+
+#define	ZX_A8_CS			0
+#define	ZX_A8_Z			1
+#define	ZX_A8_X			2
+#define	ZX_A8_C			3
+#define	ZX_A8_V			4
+
+#define	ZX_A9_A			0
+#define	ZX_A9_S			1
+#define	ZX_A9_D			2
+#define	ZX_A9_F			3
+#define	ZX_A9_G			4
+
+#define	ZX_A10_Q			0
+#define	ZX_A10_W			1
+#define	ZX_A10_E			2
+#define	ZX_A10_R			3
+#define	ZX_A10_T			4
+
+#define	ZX_A11_1			0
+#define	ZX_A11_2			1
+#define	ZX_A11_3			2
+#define	ZX_A11_4			3
+#define	ZX_A11_5			4
+
+#define	ZX_A12_0			0
+#define	ZX_A12_9			1
+#define	ZX_A12_8			2
+#define	ZX_A12_7			3
+#define	ZX_A12_6			4
+
+#define	ZX_A13_P			0
+#define	ZX_A13_O			1
+#define	ZX_A13_I			2
+#define	ZX_A13_U			3
+#define	ZX_A13_Y			4
+
+#define	ZX_A14_ENTER	0
+#define	ZX_A14_L			1
+#define	ZX_A14_K			2
+#define	ZX_A14_J			3
+#define	ZX_A14_H			4
+
+#define	ZX_A15_SPACE	0
+#define	ZX_A15_SS		1
+#define	ZX_A15_M			2
+#define	ZX_A15_N			3
+#define	ZX_A15_B			4
+
+proc clean_matrix() {
+	r24 = 0xff
+	row_8 = r24
+	row_9 = r24
+	row_10 = r24
+	row_11 = r24
+	row_12 = r24
+	row_13 = r24
+	row_14 = r24
+	row_15 = r24
+	ret
+}
+
+proc spi_write_byte(b: r16) {
+;saveregs (b) {
+;	rcall	uart_put_byte(' ')
+;	rcall	uart_put_hex_byte(b)
+;}
+	SPDR = b
+	loop (!SPSR->SPIF) {}
+	ret
+}
+
+proc spi_write_matrix() {
+;rcall	uart_put_byte(0x0A)
+;rcall	uart_put_byte('>')
+	pinSpiSlaveSelect->port = 0
+	
+;	rcall	spi_write_byte(row_11)
+;	rcall	spi_write_byte(row_10)
+;	rcall	spi_write_byte(row_9)
+;	rcall	spi_write_byte(row_12)
+;	rcall	spi_write_byte(row_13)
+;	rcall	spi_write_byte(row_8)
+;	rcall	spi_write_byte(row_14)
+;	rcall	spi_write_byte(row_15)
+
+	rcall	spi_write_byte(row_8)
+	rcall	spi_write_byte(row_9)	
+	rcall	spi_write_byte(row_10)
+	rcall	spi_write_byte(row_11)
+	rcall	spi_write_byte(row_12)
+	rcall	spi_write_byte(row_13)
+	rcall	spi_write_byte(row_14)
+	rcall	spi_write_byte(row_15)
+
+;rcall	uart_put_byte(0x0A)	
+	pinSpiSlaveSelect->port = 1
+	ret
+}
+

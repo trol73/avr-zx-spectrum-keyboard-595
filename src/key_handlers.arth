@@ -1,0 +1,370 @@
+proc key_unused_code() {
+	rjmp	ignore_scancode
+}
+
+proc key_left_alt() {
+	rjmp	key_handler_end
+}
+
+proc key_right_alt() {
+	rjmp	key_handler_end
+}
+
+proc key_left_shift() {
+	row_8[ZX_A8_CS] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_right_shift() {
+	row_15[ZX_A15_SS] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_left_ctrl() {
+	rjmp	key_handler_end
+}
+
+proc key_right_ctrl() {
+	rjmp	key_handler_end
+}
+
+proc key_space() {
+	row_15[ZX_A15_SPACE] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_tab() {
+	rjmp	key_handler_end
+}
+
+proc key_esc() {
+	rjmp	key_handler_end
+}
+
+proc key_enter() {
+	row_14[ZX_A14_ENTER] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_caps_lock() {
+	rjmp	key_handler_end
+}
+
+proc key_num_lock() {
+	rjmp	key_handler_end
+}
+
+proc key_scroll_lock() {
+	rjmp	key_handler_end
+}
+
+proc key_comma() {
+	rjmp	key_handler_end
+}
+
+proc key_slash() {
+	rjmp	key_handler_end
+}
+
+proc key_semicolon() {
+	rjmp	key_handler_end
+}
+
+proc key_0() {
+	row_12[ZX_A12_0] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_1() {
+	row_11[ZX_A11_1] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_2() {
+	row_11[ZX_A11_2] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_3() {
+	row_11[ZX_A11_3] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_4() {
+	row_11[ZX_A11_4] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_5() {
+	row_11[ZX_A11_5] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_6() {
+	row_12[ZX_A12_6] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_7() {
+	row_12[ZX_A12_7] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_8() {
+	row_12[ZX_A12_8] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_9() {
+	row_12[ZX_A12_9] = SREG->T
+	rjmp	key_handler_end
+}
+
+
+proc key_keypad_0() {
+	rjmp	key_handler_end
+}
+
+proc key_keypad_1() {
+	rjmp	key_handler_end
+}
+
+proc key_keypad_2() {
+	rjmp	key_handler_end
+}
+
+proc key_keypad_3() {
+	rjmp	key_handler_end
+}
+
+proc key_keypad_4() {
+	rjmp	key_handler_end
+}
+
+proc key_keypad_5() {
+	rjmp	key_handler_end
+}
+
+proc key_keypad_6() {
+	rjmp	key_handler_end
+}
+
+proc key_keypad_7() {
+	rjmp	key_handler_end
+}
+
+proc key_keypad_8() {
+	rjmp	key_handler_end
+}
+
+proc key_keypad_9() {
+	rjmp	key_handler_end
+}
+
+proc key_a() {
+	row_9[ZX_A9_A] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_b() {
+	row_15[ZX_A15_B] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_c() {
+	row_8[ZX_A8_C] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_d() {
+	row_9[ZX_A9_D] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_e() {
+	row_10[ZX_A10_E] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_f() {
+	row_9[ZX_A9_F] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_g() {
+	row_9[ZX_A9_G] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_h() {
+	row_14[ZX_A14_H] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_i() {
+	row_13[ZX_A13_I] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_j() {
+	row_14[ZX_A14_J] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_k() {
+	row_14[ZX_A14_K] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_l() {
+	row_14[ZX_A14_L] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_m() {
+	row_15[ZX_A15_M] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_n() {
+	row_15[ZX_A15_N] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_o() {
+	row_13[ZX_A13_O] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_p() {
+	row_13[ZX_A13_P] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_q() {
+	row_10[ZX_A10_Q] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_r() {
+	row_10[ZX_A10_R] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_s() {
+	row_9[ZX_A9_S] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_t() {
+	row_10[ZX_A10_T] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_u() {
+	row_13[ZX_A13_U] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_v() {
+	row_8[ZX_A8_V] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_w() {
+	row_10[ZX_A10_W] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_x() {
+	row_8[ZX_A8_X] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_y() {
+	row_13[ZX_A13_Y] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_z() {
+	row_8[ZX_A8_Z] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_f1() {
+	rjmp	key_handler_end
+}
+
+proc key_f2() {
+	rjmp	key_handler_end
+}
+
+proc key_f3() {
+	rjmp	key_handler_end
+}
+
+proc key_f4() {
+	rjmp	key_handler_end
+}
+
+proc key_f5() {
+	rjmp	key_handler_end
+}
+
+proc key_f6() {
+	rjmp	key_handler_end
+}
+
+proc key_f7() {
+	rjmp	key_handler_end
+}
+
+proc key_f8() {
+	rjmp	key_handler_end
+}
+
+proc key_f9() {
+	rjmp	key_handler_end
+}
+
+proc key_f10() {
+	rjmp	key_handler_end
+}
+
+proc key_f11() {
+	rjmp	key_handler_end
+}
+
+proc key_f12() {
+	rjmp	key_handler_end
+}
+
+proc key_left() {
+	row_8[ZX_A8_CS] = SREG->T
+	row_11[ZX_A11_5] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_right() {
+	row_8[ZX_A8_CS] = SREG->T
+	row_12[ZX_A12_8] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_up() {
+	row_8[ZX_A8_CS] = SREG->T
+	row_12[ZX_A12_7] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_down() {
+	row_8[ZX_A8_CS] = SREG->T
+	row_12[ZX_A12_6] = SREG->T
+	rjmp	key_handler_end
+}
+
+proc key_backspace() {
+	row_8[ZX_A8_CS] = SREG->T
+	row_12[ZX_A12_0] = SREG->T
+	rjmp	key_handler_end
+}

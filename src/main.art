@@ -1,0 +1,317 @@
+#include "config.h"
+#include "scancodes.h"
+
+$output("../firmware.hex")
+
+pin pinKeyClock = D3	; INT1
+pin pinKeyData = D2	; INT0
+
+pin pinJoyClk = D4
+pin pinJoyLatch = D5
+pin pinJoyDat = D6
+
+pin pinLed = C0
+pin pinReset = C1
+pin pinNmi = D7
+
+pin pinMosi = B3
+pin pinMiso = B4
+pin pinSck = B5
+pin pinSS = B2
+pin pinSpiSlaveSelect = B1	; TODO ошибка в схеме - надо использовать B2 как SS
+
+
+;#define KEYBOARD_RX_BUFFER_MASK  (KEYBOARD_RX_BUFFER_SIZE - 1)
+
+vectors {
+	RESET:		rjmp	main									; External Pin, Power-on Reset, Brown-out Reset and Watchdog Reset
+	INT1:			rjmp	ps2_clock_pin_changed_to_0		; External Interrupt Request 1
+	TIMER0_OVF:	rjmp	timer0_overflow					; Timer/Counter0 Overflow
+#if ENABLE_UART
+	USART_RXC:	rjmp	usart_rxc_vect						; USART, Rx Complete
+	USART_UDRE:	rjmp	usart_udre_vect					; USART Data Register Empty
+#endif
+}
+
+; Таймер TC0 используется для прерывания незавершённого приёма данных от PS2 и гашения светодиода
+
+
+;	TIMER2_COMP = 0x03      ; Timer/Counter2 Compare Match
+;	TIMER2_OVF = 0x04       ; Timer/Counter2 Overflow
+;	TIMER0_OVF = 0x09       ; Timer/Counter0 Overflow
+
+
+var key_rx_buffer: byte[KEYBOARD_RX_BUFFER_SIZE]
+var key_rx_head: byte
+var key_rx_tail: byte
+var key_bit_counter: byte
+var key_incomming_val: byte
+;var key_parity: byte
+; 1494 -> 1480 -> 1468
+
+#define FLAG_RELEASED				ADMUX->MUX0
+#define FLAG_EXTENDED				ADMUX->MUX1
+#define FLAG_PS2_READ_PARITY		ADMUX->MUX2
+; свободные биты IO которые можно использовать
+
+;#define FLAG_2			ADMUX->MUX3
+;#define FLAG_3	ADCSRA->ADFR
+;#define FLAG_4			ADCSRA->ADPS0
+;#define FLAG_5			ADCSRA->ADPS1
+;;		TWA0 = 1                ; TWI (Slave) Address register Bits bit 0
+;;		TWA1 = 2                ; TWI (Slave) Address register Bits bit 1
+;;		TWA2 = 3                ; TWI (Slave) Address register Bits bit 2
+;;		TWA3 = 4                ; TWI (Slave) Address register Bits bit 3
+;;		TWA4 = 5                ; TWI (Slave) Address register Bits bit 4
+;;		TWA5 = 6                ; TWI (Slave) Address register Bits bit 5
+;;		TWA6 = 7                ; TWI (Slave) Address register Bits bit 6
+;#define FLAG_MASK					TWBR	;TWBR7	TWBR6	TWBR5	TWBR4	TWBR3	TWBR2	TWBR1	TWBR0
+
+use r1 as regZero	; используется в прерывании, должен содержать 0 и не изменяться
+
+use r8 as row_8
+use r9 as row_9
+use r10 as row_10
+use r11 as row_11
+use r12 as row_12
+use r13 as row_13
+use r14 as row_14
+use r15 as row_15
+
+#if ENABLE_UART
+	#include "uart.arth"
+#endif
+; обработчик прерывания, будет вызываться при каждом спаде от клавиатуры на линии CLK PS/2
+; START ; DATA[8] ; PARITY ; STOP
+; При передаче используется следующий протокол: сначала передается старт-бит (всегда "0"), 
+; затем восемь бит данных,  один бит проверки на нечетность и один стоп-бит (всегда "1"). 
+; Данные должны считываться в тот момент, когда синхросигнал CLK имеет низкое значение. 
+; Формирование синхросигнала осуществляет клавиатура. 
+; Длительность как высокого, так и низкого импульсов синхросигнала обычно составляют 30-50 мкс.
+; Передача байта должна занимать 330-550 мкс
+
+; 9-й бит будет установлен, если количество единиц (и нулей) в числе чётное 
+; Значение этого бита должно совпасть с посчитанным в процессе приёма флагом (FLAG_PS2_READ_PARITY)
+; После обработки 9-го бита FLAG_PS2_READ_PARITY будет содержать признак ошибки приёма (0 - если всё ок)
+proc ps2_clock_pin_changed_to_0() {
+	use r24 as bit_count
+	use r23 as tmp
+	saveregs (bit_count, tmp, SREG) {
+		TCNT0 = tmp = 0xF2	; установка TC0, переполнение через 860 мкСек
+		bit_count = key_bit_counter
+		if (bit_count == 0) {						; 0 - стартовый бит
+			key_incomming_val = bit_count
+			FLAG_PS2_READ_PARITY = 1
+		} else if (bit_count <= 8) {				; 1..8 - биты данных
+			SREG->C = pinKeyData->pin
+			tmp = key_incomming_val
+			ror	tmp
+			key_incomming_val = tmp
+			rjmp	calc_parity
+		} else if (bit_count == 9) {				; 9 - бит чётности
+calc_parity:
+			if (pinKeyData->pin) {
+				if (FLAG_PS2_READ_PARITY) {
+					FLAG_PS2_READ_PARITY = 0 
+				} else { 
+					FLAG_PS2_READ_PARITY = 1
+				}
+			}
+		} else {							; 10 - стоп-бит, обрабатываем приём
+			if (FLAG_PS2_READ_PARITY) {
+#if DEBUG				
+				saveregs (ZL, ZH, r24) {
+					rcall	uart_put_byte('!')
+					rcall	uart_put_byte(0x0A)
+				}
+#endif
+				; возникла ошибка чётности
+				; TODO по-хорошему, надо что-то сделать, например, попросить клавиатуру выслать байт заново
+			} else {
+				TCNT0 = regZero	; установка TC0, переполнение через ~16 мСек
+				pinLed->port = 1
+;				saveregs (ZL, ZH, r24) {
+;					rcall	uart_put_hex_byte(key_incomming_val)
+;					rcall	uart_put_byte(' ')
+;				}
+				
+				; добавляем прочитанное значение в начало циклической очереди
+				saveregs (ZL, ZH) {		
+					ZL = key_rx_head + 1
+					ZL &= (KEYBOARD_RX_BUFFER_SIZE - 1)
+					ZH = key_rx_tail	
+					if (ZH != ZL) {	; в буфере есть место
+						key_rx_head = ZL
+						ZH = 0
+						Z += key_rx_buffer
+						mem[Z] = tmp = key_incomming_val
+					};
+				}
+			}
+			bit_count = 0xff	; следующая инструкция обнулит счётчик
+		}
+		; конец обработчика, увеличиваем счётчик
+		key_bit_counter = ++bit_count
+	}
+
+	reti
+}
+
+
+
+proc timer0_overflow() {
+	; сбрасываем номер бита (если клавиатура прервала передачу) и гасим светодиод
+	pinLed->port = 0
+	key_bit_counter = regZero
+	reti
+}
+
+; Проверяет, есть ли принятый скан-код от клавиатуры
+; Если да, то устанавливает SREG->T, и возвращает код в r24
+proc keyboard_check_scancode() {	
+	ZL = key_rx_tail
+	ZH = key_rx_head
+
+	SREG->T = 0
+	if (ZH == ZL)	ret
+	SREG->T = 1
+;	loop {
+;		ZH = key_rx_head
+;		if (ZH != ZL) break
+;	}
+
+    ; calculate buffer index
+	ZL++
+	ZL &= (KEYBOARD_RX_BUFFER_SIZE - 1)
+	key_rx_tail = ZL
+	ZH = 0
+
+
+	Z += key_rx_buffer
+	r24 = mem[Z]
+	ret
+}
+
+inline proc init() {
+	SPH = r16 = high(RAMEND) ; set stack pointer
+	SPL = r16 = low(RAMEND)
+	
+	DDRB = r16 = bitmask(pinMosi, pinSck, pinSS, pinSpiSlaveSelect)
+	DDRC = r16 = bitmask(pinLed);, pinReset)
+;	DDRD = r16 = bitmask(pinNmi)
+
+    
+	; INT1 - прерывание по спаду 
+	MCUCR = r16 = bitmask(ISC11)
+	GICR = r16 = bitmask(INT1)
+	
+	; Таймер-0
+	TCCR0 = r16 = bitmask(CS02, CS00)	; делитель на 1024
+	TIMSK = r16 = bitmask(TOIE0)			; включение прерывания по переполнению
+	
+	; SPI
+	; Пины MOSI, Master SS, SCK требуется установить на вывод (иначе SPI не будет работать)
+	; (даже если пин SS не используется в SPI)
+	
+	pinSpiSlaveSelect->port = 1	; deselect SPI
+	; Enable SPI, set master mode and clock rate to 1/4 (4MHz with F_CPU=16MHz)
+	SPCR = r16 = bitmask(SPE, MSTR)
+	SPSR = r16 = bitmask(SPI2X)	; SPI speed (f/2, 8MHz)
+
+	regZero = 0
+	
+	pinSpiSlaveSelect->port = 1
+
+	key_rx_head = regZero
+	key_rx_tail = regZero
+	key_bit_counter = regZero
+	
+	rcall	clean_matrix()
+
+#if ENABLE_UART
+	uart_init()
+#endif
+
+	sei
+}
+
+proc main() {
+	init()    
+#if DEBUG
+	rcall	uart_put_byte('S')
+	rcall	uart_put_byte('T')
+	rcall	uart_put_byte('A')
+	rcall	uart_put_byte('R')
+	rcall	uart_put_byte('T')
+	rcall	uart_put_byte(0x0A)
+#endif    
+
+	loop {
+@wait_next_scancode:
+		rcall	keyboard_check_scancode
+		if (SREG->T) {
+			scancode_handler()
+@key_handler_end:
+			rcall	spi_write_matrix()
+@ignore_scancode:
+			FLAG_RELEASED = 0
+			FLAG_EXTENDED = 0
+		}
+
+	}
+
+}
+
+inline proc scancode_handler(code: r24) {
+#if DEBUG	
+	saveregs (code) {
+		rcall	uart_put_hex_byte(code)
+		rcall	uart_put_byte(0x0A)
+	}
+#endif
+	SREG->T = FLAG_RELEASED
+	if (!FLAG_EXTENDED) {
+		if (code <= 0x84) {
+			code <<= 1							; *= 2
+			Z = scancodes_handlers_table + regZero.code
+	
+			r24 = prg[Z++]
+			r25 = prg[Z]
+	
+			Z = r25.r24
+		
+			ijmp
+		}
+	} else {
+		if (code <= 0x7D) {
+			code <<= 1							; *= 2
+			Z = scancodes_ex_handlers_table + regZero.code
+	
+			r24 = prg[Z++]
+			r25 = prg[Z]
+	
+			Z = r25.r24
+		
+			ijmp
+		} 
+	}
+	if (code == SCANCODE_EXTENDED) {			; E0
+		FLAG_EXTENDED = 1
+		rjmp	wait_next_scancode
+	} 
+	if (code == SCANCODE_EXTENDED_1) {		; E1
+		FLAG_EXTENDED = 1
+		rjmp	wait_next_scancode
+	}
+	if (code == SCANCODE_RELEASED) {			; F0
+		FLAG_RELEASED = 1
+		rjmp	wait_next_scancode
+	}
+	rjmp ignore_scancode
+}
+
+#include "scancodes_table.arth"
+#include "scancodes_ex_table.arth"
+#include "zx_matrix.arth"
+#include "key_handlers.arth"
+

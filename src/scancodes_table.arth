@@ -1,0 +1,269 @@
+; Set-2
+scancodes_handlers_table: word[] {
+; 0x00	ERROR
+	key_unused_code/2
+; 0x01	F9
+	key_f9/2
+; 0x02	UNUSED
+	key_unused_code/2
+; 0x03	F5
+	key_f5/2
+; 0x04	F3
+	key_f3/2
+; 0x05	F1
+	key_f1/2
+; 0x06	F2
+	key_f2/2
+; 0x07	F12
+	key_f12/2
+; 0x08	UNUSED
+	key_unused_code/2
+; 0x09	F10
+	key_f10/2
+; 0x0A	F8
+	key_f8/2
+; 0x0B	F6
+	key_f6/2
+; 0x0C	F4
+	key_f4/2
+; 0x0D	TAB
+	key_tab/2
+; 0x0E	ACCENT '`'
+	key_unused_code/2
+; 0x0F	UNUSED
+	key_unused_code/2
+; 0x10	UNUSED
+	key_unused_code/2
+; 0x11	L_ALT
+	key_left_alt/2
+; 0x12	L_SHIFT
+	key_left_shift/2
+; 0x13	UNUSED
+	key_unused_code/2
+; 0x14	L_CTRL
+	key_left_ctrl/2
+; 0x15	Q
+	key_q/2
+; 0x16	1
+	key_1/2
+; 0x17	UNUSED
+	key_unused_code/2
+; 0x18	UNUSED
+	key_unused_code/2
+; 0x19	UNUSED
+	key_unused_code/2
+; 0x1A	Z
+	key_z/2
+; 0x1B	S
+	key_s/2
+; 0x1C	A
+	key_a/2
+; 0x1D	W
+	key_w/2
+; 0x1E	2
+	key_2/2
+; 0x1F	UNUSED
+	key_unused_code/2
+; 0x20	UNUSED
+	key_unused_code/2
+; 0x21	C
+	key_c/2
+; 0x22	X
+	key_x/2
+; 0x23	D
+	key_d/2
+; 0x24	E
+	key_e/2
+; 0x25	4
+	key_4/2
+; 0x26	3
+	key_3/2
+; 0x27	UNUSED
+	key_unused_code/2
+; 0x28	UNUSED
+	key_unused_code/2
+; 0x29	SPACE
+	key_space/2
+; 0x2A	V
+	key_v/2
+; 0x2B	F
+	key_f/2
+; 0x2C	T
+	key_t/2
+; 0x2D	R
+	key_r/2
+; 0x2E	5
+	key_5/2
+; 0x2F	UNUSED
+	key_unused_code/2
+; 0x30	UNUSED
+	key_unused_code/2
+; 0x31	N
+	key_n/2
+; 0x32	B
+	key_b/2
+; 0x33	H
+	key_h/2
+; 0x34	G
+	key_g/2
+; 0x35	Y
+	key_y/2
+; 0x36	6
+	key_6/2
+; 0x37	UNUSED
+	key_unused_code/2
+; 0x38	UNUSED
+	key_unused_code/2
+; 0x39	UNUSED
+	key_unused_code/2
+; 0x3A	M
+	key_m/2
+; 0x3B	J
+	key_j/2
+; 0x3C	U
+	key_u/2
+; 0x3D	7
+	key_7/2
+; 0x3E	8
+	key_8/2
+; 0x3F	UNUSED
+	key_unused_code/2
+; 0x40	UNUSED
+	key_unused_code/2
+; 0x41	COMMA	','
+	key_comma/2
+; 0x42	K
+	key_k/2
+; 0x43	I
+	key_i/2
+; 0x44	O
+	key_o/2
+; 0x45	0
+	key_0/2
+; 0x46	9
+	key_9/2
+; 0x47	UNUSED
+	key_unused_code/2
+; 0x48	UNUSED
+	key_unused_code/2
+; 0x49	PERIOD	'.' >
+	key_unused_code/2
+; 0x4A	SLASH	'/'
+	key_slash/2
+; 0x4B	L
+	key_l/2
+; 0x4C	SEMICOLON	';'
+	key_semicolon/2
+; 0x4D	P
+	key_p/2
+; 0x4E	MINUS	'-'
+	key_unused_code/2
+; 0x4F	UNUSED
+	key_unused_code/2
+; 0x50	UNUSED
+	key_unused_code/2
+; 0x51	UNUSED
+	key_unused_code/2
+; 0x52	QUOTE		'
+	key_unused_code/2
+; 0x53	UNUSED
+	key_unused_code/2
+; 0x54	LEFT_BRACKET	 '['
+	key_unused_code/2
+; 0x55	EQUALS			 '='
+	key_unused_code/2
+; 0x56	UNUSED
+	key_unused_code/2
+; 0x57	UNUSED
+	key_unused_code/2
+; 0x58	CAPS LOCK
+	key_caps_lock/2
+; 0x59	R_SHIFT
+	key_right_shift/2
+; 0x5A	ENTER
+	key_enter/2
+; 0x5B	RIGHT_BRACKET ']'
+	key_unused_code/2
+; 0x5C	UNUSED
+	key_unused_code/2
+; 0x5D	BACK_SLASH	 '\'
+	key_unused_code/2
+; 0x5E	UNUSED
+	key_unused_code/2
+; 0x5F	UNUSED
+	key_unused_code/2
+; 0x60	UNUSED
+	key_unused_code/2
+; 0x61	UNUSED
+	key_unused_code/2
+; 0x62	UNUSED
+	key_unused_code/2
+; 0x63	UNUSED
+	key_unused_code/2
+; 0x64	UNUSED
+	key_unused_code/2
+; 0x65	UNUSED
+	key_unused_code/2
+; 0x66	BACKSPACE
+	key_backspace/2
+; 0x67	UNUSED
+	key_unused_code/2
+; 0x68	UNUSED
+	key_unused_code/2
+; 0x69	KEYPAD 1 / END
+	key_keypad_1/2
+; 0x6A	UNUSED
+	key_unused_code/2
+; 0x6B	KEYPAD 4 / LEFT
+	key_keypad_4/2
+; 0x6C	KEYPAD 7 / HOME
+	key_keypad_7/2
+; 0x6D	UNUSED
+	key_unused_code/2
+; 0x6E	UNUSED
+	key_unused_code/2
+; 0x6F	UNUSED
+	key_unused_code/2
+; 0x70	KEYPAD 0 / INSERT
+	key_keypad_0/2
+; 0x71	KEYPAD PERIOD	'.' / DEL
+	key_unused_code/2
+; 0x72	KEYPAD 2 / DOWN
+	key_keypad_2/2
+; 0x73	KEYPAD 5
+	key_keypad_5/2
+; 0x74	KEYPAD 6 / RIGHT
+	key_keypad_6/2
+; 0x75	KEYPAD 8 / UP
+	key_keypad_8/2
+; 0x76	ESC
+	key_esc/2
+; 0x77	NUMLOCK
+	key_num_lock/2
+; 0x78	F11
+	key_f11/2
+; 0x79	KEYPAD PLUS
+	key_unused_code/2
+; 0x7A	KEYPAD 3 / PAGE DOWN
+	key_keypad_3/2
+; 0x7B	KEYPAD MINUS
+	key_unused_code/2
+; 0x7C	KEYPAD STAR
+	key_unused_code/2
+; 0x7D	KEYPAD 9 / PAGE UP
+	key_keypad_9/2
+; 0x7E	SCROLL LOCK
+	key_scroll_lock/2
+; 0x7F	UNUSED
+	key_unused_code/2
+; 0x80	UNUSED
+	key_unused_code/2
+; 0x81	UNUSED
+	key_unused_code/2
+; 0x82	UNUSED
+	key_unused_code/2
+; 0x83	F7
+	key_f7/2
+; 0x84	Alt+SysRq
+	key_unused_code/2
+}
