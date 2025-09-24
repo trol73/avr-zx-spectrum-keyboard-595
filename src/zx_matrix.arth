@@ -92,8 +92,6 @@ proc spi_write_byte(b: r16) {
 }
 
 proc spi_write_matrix() {
-;rcall	uart_put_byte(0x0A)
-;rcall	uart_put_byte('>')
 	pinSpiSlaveSelect->port = 0
 	
 ;	rcall	spi_write_byte(row_11)

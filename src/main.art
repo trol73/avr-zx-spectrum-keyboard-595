@@ -21,8 +21,6 @@ pin pinSS = B2
 pin pinSpiSlaveSelect = B1	; TODO ошибка в схеме - надо использовать B2 как SS
 
 
-;#define KEYBOARD_RX_BUFFER_MASK  (KEYBOARD_RX_BUFFER_SIZE - 1)
-
 vectors {
 	RESET:		rjmp	main									; External Pin, Power-on Reset, Brown-out Reset and Watchdog Reset
 	INT1:			rjmp	ps2_clock_pin_changed_to_0		; External Interrupt Request 1
@@ -36,18 +34,11 @@ vectors {
 ; Таймер TC0 используется для прерывания незавершённого приёма данных от PS2 и гашения светодиода
 
 
-;	TIMER2_COMP = 0x03      ; Timer/Counter2 Compare Match
-;	TIMER2_OVF = 0x04       ; Timer/Counter2 Overflow
-;	TIMER0_OVF = 0x09       ; Timer/Counter0 Overflow
-
-
 var key_rx_buffer: byte[KEYBOARD_RX_BUFFER_SIZE]
 var key_rx_head: byte
 var key_rx_tail: byte
 var key_bit_counter: byte
 var key_incomming_val: byte
-;var key_parity: byte
-; 1494 -> 1480 -> 1468
 
 #define FLAG_RELEASED				ADMUX->MUX0
 #define FLAG_EXTENDED				ADMUX->MUX1
@@ -175,12 +166,8 @@ proc keyboard_check_scancode() {
 	SREG->T = 0
 	if (ZH == ZL)	ret
 	SREG->T = 1
-;	loop {
-;		ZH = key_rx_head
-;		if (ZH != ZL) break
-;	}
 
-    ; calculate buffer index
+	; calculate buffer index
 	ZL++
 	ZL &= (KEYBOARD_RX_BUFFER_SIZE - 1)
 	key_rx_tail = ZL
