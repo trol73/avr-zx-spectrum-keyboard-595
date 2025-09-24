@@ -81,24 +81,13 @@ proc usart_rxc_vect() {
 		ZL = UART_RxHead + 1
 		r24 = UART_RxTail
 	
-;		if (r24 == ZL) {
-;			ZH = 2		; ZH = UART_BUFFER_OVERFLOW
-;		} else {
 		if (r24 != ZL) {
 			UART_RxHead = ZL
 			ZH = 0
 			Z += UART_RxBuf
 			mem[Z] = r24 = UDR
-;			ZH = UCSRA & bitmask(FE, DOR, UPE)			; read UART status register, lastRxError = usr & (_BV(FE)|_BV(DOR) );
-; FE: Ошибка кадра. 
-;	устанавливается при обнаружении условий ошибочного приема кадра, т.е. когда стоповый бит входящего символа в состоянии 0. Бит FE очищается при приеме стопового бита с логическим уровнем 1.
-; DOR: Переполнение данных. 
-;	устанавливается при обнаружении условий переполнения, т.е. когда байт уже находящийся в регистре UDR, не считан перед пересылкой нового байта из сдвигового регистра приема. Бит DOR буферирован, что означает, что он будет оставаться установленным, пока не будут считаны правильные данные из UDR. Бит DOR очищается  когда данные приняты и пересланы в UDR.
-; UРЕ: Ошибка контроля четности. 
-;	устанавливается, если данных, находящихся в буфере приемника, выявлена ошибка контроля четности. При отключенном контроле четности бит постоянно равен 0.
 
 		}
-;		UART0_LastRxError = r24 = UART0_LastRxError | ZH
 	}
 	reti
 }
@@ -149,52 +138,9 @@ proc uart_put_hex_byte(b: r24) {
 	rjmp	uart_put_hex_nibble(r24)
 }
 
-;proc uart_wait_word() { ; -> r25.r24, портит r3, r2, r30, r31
-;	rcall	uart_wait_byte
-;	r1 = r0
-;}
-
-
-;; портит Z, r3, r3
-;proc uart_wait_byte() { ; -> r0
-;	use r2 as head
-;	; waiting data ready
-;	ZL = UART_RxTail
-;	loop {
-;		ZH = UART_RxHead
-;		if (ZH != ZL) break
-;	}
-;
-;    ; calculate buffer index
-;;    uint16_t tmptail = (UART_RxTail + 1) & UART_RX_BUFFER_MASK;
-;	ZL++
-;;	ZH &= 1
-;	ZH = 0
-;	UART_RxTail = ZL
-;
-;	; get data from receive buffer
-;	; data = UART_RxBuf[tmptail]
-;	Z += UART_RxBuf
-;	r0 = mem[Z]
-;	ret
-;}
-
-;proc uartDataIsReady() {	; возвращает SREG->Z = 0, если в UART есть готовые данные для чтения
-;	use r2 as head	
-;	use ZL as tail
-;	
-;	tail = UART_RxTail
-;	head = UART_RxHead
-;	cp		r2, ZL
-;;	cpc	r3, r31
-;
-;	ret
-;}
-
 
 
 inline proc uart_init() {
-	; Init UART
 	#if UART_DOUBLE_SPEED
 		UART_STATUS->UART_U2X = 1
 	#else
@@ -205,8 +151,8 @@ inline proc uart_init() {
 	UART_CONTROL = r16 = bitmask(UART_RXCIE, UART_RXEN, UART_TXEN)
 	UART_CONTROLC = r16 = UART_CONTROLC_VAL
 
-	UART_TxHead = regZero	;r16 = 0		; TODO use r0
-	UART_TxTail = regZero	;r16
-	UART_RxHead = regZero	;r16.r16
-	UART_RxTail = regZero;	r16.r16
+	UART_TxHead = regZero
+	UART_TxTail = regZero
+	UART_RxHead = regZero
+	UART_RxTail = regZero
 }
